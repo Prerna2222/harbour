@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Harbour — Contract Risk Analyser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ocean-deep:   #0d2233;
+    --ocean-mid:    #163347;
+    --ocean-light:  #1e4a63;
+    --teal:         #1a7a6e;
+    --teal-light:   #e4f4f2;
+    --copper:       #b87333;
+    --copper-light: #f7ede0;
+    --copper-mid:   #d4935a;
+    --sand:         #f8f5f0;
+    --sand-dark:    #ede9e2;
+    --white:        #fdfcfa;
+    --ink:          #0d2233;
+    --ink-mid:      #2e4a5a;
+    --ink-light:    #5a7a8a;
+    --ink-faint:    #9ab0ba;
+    --red:          #b03a2e;
+    --red-bg:       #fdf1f0;
+    --amber:        #956b0a;
+    --amber-bg:     #fdf7ec;
+    --green:        #1e6b4a;
+    --green-bg:     #eef7f2;
+    --slate:        #5a7a8a;
+    --slate-bg:     #eef2f4;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+    --radius:       6px;
+    --radius-lg:    12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--sand);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ocean-deep);
+    padding: 0 2.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--copper);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { color: var(--copper); }
+
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: .02em;
+  }
+
+  .header-tag {
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  /* HERO BAND */
+  .hero {
+    background: var(--ocean-mid);
+    padding: 3rem 2.5rem 2.5rem;
+    border-bottom: 3px solid var(--copper);
+  }
+
+  .hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    margin-bottom: .75rem;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--copper-mid);
+  }
+
+  .hero p {
+    font-size: 14px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 5rem;
+  }
+
+  /* STATES */
+  #upload-state  { display: block; }
+  #loading-state { display: none; }
+  #report-state  { display: none; }
+
+  /* UPLOAD */
+  .upload-zone {
+    border: 1.5px dashed var(--ink-faint);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: var(--white);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--copper);
+    background: var(--copper-light);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: var(--ocean-deep);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.1rem;
+  }
+
+  .upload-icon-wrap svg { color: var(--copper); }
+
+  .upload-zone h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: .35rem;
+  }
+
+  .upload-zone p {
+    font-size: 13px;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+
+  .file-chip {
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ocean-deep);
+    background: var(--teal-light);
+    border: 1px solid #b0d8d3;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .analyse-btn {
+    margin-top: 1.25rem;
+    display: block;
+    width: 100%;
+    padding: .95rem;
+    background: var(--ocean-deep);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: .03em;
+    transition: background .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .analyse-btn:hover:not(:disabled) { background: var(--ocean-light); }
+  .analyse-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .analyse-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--copper);
+  }
+
+  .clause-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1.5rem;
+  }
+
+  .clause-tag {
+    font-size: 12px;
+    color: var(--ink-mid);
+    background: var(--white);
+    border: 1px solid var(--sand-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 400;
+  }
+
+  .error-box {
+    background: var(--red-bg);
+    border: 1px solid #f0c0bc;
+    border-radius: var(--radius);
+    padding: .85rem 1.1rem;
+    color: var(--red);
+    font-size: 13px;
+    margin-top: .85rem;
+    display: none;
+  }
+
+  /* LOADING */
+  .loading-wrap {
+    padding: 3.5rem 0;
+    text-align: center;
+  }
+
+  .loading-wrap h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: .4rem;
+  }
+
+  .loading-wrap p {
+    font-size: 13px;
+    color: var(--ink-light);
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 320px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: .65rem 0;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: calc(.65rem + 22px);
+    width: 1px;
+    height: calc(100% - 10px);
+    background: var(--sand-dark);
+  }
+
+  .step-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-faint);
+    background: var(--white);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .4s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step.active .step-dot {
+    border-color: var(--copper);
+    background: var(--copper);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  .step.done .step-dot {
+    border-color: var(--teal);
+    background: var(--teal);
+  }
+
+  .step.done .step-dot::after {
+    content: '';
+    width: 7px;
+    height: 4px;
+    border-left: 1.5px solid white;
+    border-bottom: 1.5px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+
+  .step.active .step-dot::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: white;
+    display: block;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(184,115,51,.3); }
+    50%      { box-shadow: 0 0 0 7px rgba(184,115,51,0); }
+  }
+
+  .step-label {
+    font-size: 14px;
+    color: var(--ink-faint);
+    font-weight: 300;
+    transition: color .3s;
+  }
+
+  .step.active .step-label { color: var(--ink); font-weight: 500; }
+  .step.done .step-label { color: var(--ink-faint); text-decoration: line-through; }
+
+  /* REPORT */
+  .report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .report-header h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .report-header p {
+    font-size: 12px;
+    color: var(--ink-light);
+    font-weight: 300;
+    margin-top: .25rem;
+  }
+
+  .download-btn {
+    padding: .6rem 1.1rem;
+    border: 1px solid var(--copper);
+    border-radius: var(--radius);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--copper);
+    transition: all .2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .download-btn:hover {
+    background: var(--ocean-deep);
+    color: var(--copper-mid);
+    border-color: var(--ocean-deep);
+  }
+
+  .summary-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+    background: var(--ocean-deep);
+    border-radius: var(--radius-lg);
+    align-items: center;
+  }
+
+  .summary-label {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 400;
+    margin-right: .5rem;
+  }
+
+  .summary-pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: .35rem .9rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .summary-pill .count { font-size: 15px; font-weight: 600; }
+  .pill-high   { background: #3d1a18; color: #f08070; }
+  .pill-med    { background: #3a2a0a; color: #e8b060; }
+  .pill-low    { background: #0e2e1e; color: #70c090; }
+  .pill-na     { background: #1a2a34; color: #7090a0; }
+
+  /* TABLE */
+  .report-table-wrap {
+    border: 1px solid var(--sand-dark);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background: var(--white);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  thead th {
+    background: var(--ocean-deep);
+    text-align: left;
+    padding: .7rem 1rem;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 2px solid var(--copper);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--sand-dark); transition: background .15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--sand); }
+  tbody td { padding: .9rem 1rem; vertical-align: top; }
+
+  .clause-name { font-weight: 500; color: var(--ink); font-size: 13px; }
+  .plain-text  { color: var(--ink-mid); line-height: 1.55; font-size: 13px; }
+
+  .risk-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: .02em;
+  }
+
+  .risk-HIGH      { background: var(--red-bg);   color: var(--red);   }
+  .risk-MEDIUM    { background: var(--amber-bg);  color: var(--amber); }
+  .risk-LOW       { background: var(--green-bg);  color: var(--green); }
+  .risk-NOT_FOUND { background: var(--slate-bg);  color: var(--slate); }
+
+  /* ACCORDION */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .section-divider span {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    white-space: nowrap;
+  }
+
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--sand-dark);
+  }
+
+  .acc-item {
+    border: 1px solid var(--sand-dark);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    overflow: hidden;
+    background: var(--white);
+    transition: border-color .2s;
+  }
+
+  .acc-item:hover { border-color: var(--ink-faint); }
+  .acc-item.open  { border-color: var(--copper); }
+
+  .acc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 1rem;
+  }
+
+  .acc-header-left { display: flex; align-items: center; gap: 10px; }
+  .acc-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+  .acc-chevron {
+    width: 16px; height: 16px;
+    color: var(--ink-faint);
+    transition: transform .25s;
+    flex-shrink: 0;
+  }
+
+  .acc-item.open .acc-chevron { transform: rotate(180deg); color: var(--copper); }
+
+  .acc-body {
+    display: none;
+    padding: 0 1rem 1.1rem;
+    border-top: 1px solid var(--sand-dark);
+  }
+
+  .acc-item.open .acc-body { display: block; }
+
+  .acc-plain {
+    font-size: 13px;
+    color: var(--ink-mid);
+    line-height: 1.65;
+    padding-top: .85rem;
+  }
+
+  .quote-box {
+    background: var(--sand);
+    border-left: 3px solid var(--copper);
+    padding: .75rem 1rem;
+    margin-top: .85rem;
+    font-size: 12px;
+    color: var(--ink-mid);
+    line-height: 1.7;
+    font-style: italic;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  .quote-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: .35rem;
+    font-style: normal;
+  }
+
+  .reset-btn {
+    margin-top: 2.5rem;
+    font-size: 13px;
+    color: var(--ink-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0;
+    transition: color .2s;
+  }
+
+  .reset-btn:hover { color: var(--copper); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: .04em;
+    border-top: 1px solid var(--sand-dark);
+    margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 2v8M2 10c0 3 2 4 6 4s6-1 6-4"/>
+        <path d="M2 10c0-2 2-3 6-3s6 1 6 3"/>
+      </svg>
+    </div>
+    <span class="logo-name">Harbour</span>
+  </div>
+  <span class="header-tag">Contract Risk Analyser</span>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>Upload your contract.<br><em>Know your risks.</em></h1>
+    <p>We scan for 6 key legal risk clauses and explain exactly what they mean for your business — in plain English, in seconds.</p>
+  </div>
+</div>
+
+<main>
+
+  <!-- UPLOAD STATE -->
+  <div id="upload-state">
+    <div class="upload-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".pdf"/>
+      <div class="upload-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 16V4M7 9l5-5 5 5"/>
+          <path d="M4 17v1a2 2 0 002 2h12a2 2 0 002-2v-1"/>
+        </svg>
+      </div>
+      <h3>Drop your PDF here</h3>
+      <p>or click to browse &mdash; up to 30 pages</p>
+      <div class="file-chip" id="file-name-display" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h6l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/></svg>
+        <span id="file-name-text"></span>
+      </div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+
+    <button class="analyse-btn" id="analyse-btn" disabled>Analyse contract</button>
+
+    <div class="clause-tags">
+      <span class="clause-tag">Auto-renewal</span>
+      <span class="clause-tag">Liability cap</span>
+      <span class="clause-tag">Termination rights</span>
+      <span class="clause-tag">IP ownership</span>
+      <span class="clause-tag">Payment terms</span>
+      <span class="clause-tag">Non-compete</span>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div id="loading-state">
+    <div class="loading-wrap">
+      <h2>Reviewing your contract...</h2>
+      <p>Our AI attorney is reading every clause</p>
+      <div class="steps">
+        <div class="step" id="step-0"><div class="step-dot"></div><span class="step-label">Uploading contract</span></div>
+        <div class="step" id="step-1"><div class="step-dot"></div><span class="step-label">Extracting text</span></div>
+        <div class="step" id="step-2"><div class="step-dot"></div><span class="step-label">Identifying clauses</span></div>
+        <div class="step" id="step-3"><div class="step-dot"></div><span class="step-label">Analysing risk</span></div>
+        <div class="step" id="step-4"><div class="step-dot"></div><span class="step-label">Generating report</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT STATE -->
+  <div id="report-state">
+    <div class="report-header">
+      <div>
+        <h2>Risk Report</h2>
+        <p id="report-filename"></p>
+      </div>
+      <button class="download-btn" onclick="downloadReport()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/></svg>
+        Download PDF
+      </button>
+    </div>
+
+    <div class="summary-bar" id="summary-bar">
+      <span class="summary-label">Risk summary</span>
+    </div>
+
+    <div class="report-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">Clause</th>
+            <th style="width:13%">Risk level</th>
+            <th>Plain English summary</th>
+          </tr>
+        </thead>
+        <tbody id="report-table-body"></tbody>
+      </table>
+    </div>
+
+    <div id="accordion-section">
+      <div class="section-divider"><span>Clauses requiring attention</span></div>
+      <div id="accordion-items"></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetToUpload()">Analyse another contract</button>
+  </div>
+
+</main>
+
+<footer>
+  Harbour &mdash; Contract Risk Analyser &mdash; For informational purposes only. Not legal advice.
+  <br style="margin-bottom:.4rem"/>
+  <span style="opacity:.7">Currently reviews: Vendor Agreements &middot; NDAs &middot; Employment &amp; Contractor Agreements &middot; Client MSAs &middot; Statements of Work &middot; Lease Agreements</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  const WEBHOOK_URL = 'https://n8n.srv1042888.hstgr.cloud/webhook/3a941326-eb6f-447a-98d6-6047a2cd7b6c';
+
+  const fileInput        = document.getElementById('file-input');
+  const dropZone         = document.getElementById('drop-zone');
+  const analyseBtn       = document.getElementById('analyse-btn');
+  const fileNameDisplay  = document.getElementById('file-name-display');
+  const fileNameText     = document.getElementById('file-name-text');
+  const errorBox         = document.getElementById('error-box');
+
+  let selectedFile = null;
+
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  function handleFile(file) {
+    if (file.type !== 'application/pdf') { showError('Please upload a PDF file.'); return; }
+    selectedFile = file;
+    fileNameText.textContent = file.name;
+    fileNameDisplay.style.display = 'inline-flex';
+    analyseBtn.disabled = false;
+    hideError();
+  }
+
+  analyseBtn.addEventListener('click', startAnalysis);
+
+  function showError(msg) { errorBox.textContent = msg; errorBox.style.display = 'block'; }
+  function hideError()    { errorBox.style.display = 'none'; }
+
+  async function startAnalysis() {
+    if (!selectedFile) return;
+    showState('loading');
+    runProgressSteps();
+
+    const formData = new FormData();
+    formData.append('file0', selectedFile, selectedFile.name);
+
+    try {
+      const res  = await fetch(WEBHOOK_URL, { method: 'POST', body: formData });
+      const text = await res.text();
+
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Could not parse response from server.'); }
+
+      if (data.status === 'error') throw new Error(data.message);
+
+      let clauses = null;
+      if (Array.isArray(data)) {
+        clauses = data;
+      } else if (typeof data === 'string') {
+        clauses = JSON.parse(data);
+      } else if (data.message && data.message.content) {
+        const raw = data.message.content[0]?.text || data.message.content;
+        clauses = JSON.parse(raw);
+      } else if (data.text) {
+        clauses = JSON.parse(data.text);
+      } else if (data.output) {
+        clauses = typeof data.output === 'string' ? JSON.parse(data.output) : data.output;
+      } else if (data.choices) {
+        const raw = data.choices[0]?.message?.content;
+        clauses = JSON.parse(raw);
+      } else {
+        clauses = JSON.parse(JSON.stringify(data));
+      }
+
+      if (!Array.isArray(clauses)) throw new Error('Unexpected response format from server.');
+
+      renderReport(clauses, selectedFile.name);
+      showState('report');
+    } catch (err) {
+      showState('upload');
+      showError(err.message || 'Something went wrong. Please try again.');
+    }
+  }
+
+  const stepTimings = [0, 2000, 5000, 10000, 20000];
+  let stepTimers = [];
+
+  function runProgressSteps() {
+    stepTimers.forEach(clearTimeout);
+    stepTimers = [];
+    for (let i = 0; i < 5; i++) {
+      stepTimers.push(setTimeout(() => activateStep(i), stepTimings[i]));
+    }
+  }
+
+  function activateStep(i) {
+    for (let j = 0; j < i; j++) document.getElementById('step-'+j).className = 'step done';
+    document.getElementById('step-'+i).className = 'step active';
+  }
+
+  function showState(s) {
+    document.getElementById('upload-state').style.display  = s === 'upload'  ? 'block' : 'none';
+    document.getElementById('loading-state').style.display = s === 'loading' ? 'block' : 'none';
+    document.getElementById('report-state').style.display  = s === 'report'  ? 'block' : 'none';
+  }
+
+  function normaliseRisk(r) {
+    if (!r) return 'NOT_FOUND';
+    const v = r.toString().toUpperCase().trim().replace(/\s+/g,'_');
+    if (v === 'HIGH')   return 'HIGH';
+    if (v === 'MEDIUM' || v === 'MED') return 'MEDIUM';
+    if (v === 'LOW')    return 'LOW';
+    return 'NOT_FOUND';
+  }
+
+  function formatName(n) {
+    if (!n) return '';
+    return n.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderReport(clauses, filename) {
+    document.getElementById('report-filename').textContent = filename;
+
+    let high=0, med=0, low=0, na=0;
+    clauses.forEach(c => {
+      const r = normaliseRisk(c.risk_level);
+      if (r==='HIGH') high++; else if (r==='MEDIUM') med++; else if (r==='LOW') low++; else na++;
+    });
+
+    const bar = document.getElementById('summary-bar');
+    bar.innerHTML = '<span class="summary-label">Risk summary</span>';
+    if (high) bar.innerHTML += `<div class="summary-pill pill-high"><span class="count">${high}</span> High</div>`;
+    if (med)  bar.innerHTML += `<div class="summary-pill pill-med"><span class="count">${med}</span> Medium</div>`;
+    if (low)  bar.innerHTML += `<div class="summary-pill pill-low"><span class="count">${low}</span> Low</div>`;
+    if (na)   bar.innerHTML += `<div class="summary-pill pill-na"><span class="count">${na}</span> Not found</div>`;
+
+    const tbody = document.getElementById('report-table-body');
+    tbody.innerHTML = '';
+    clauses.forEach(c => {
+      const r = normaliseRisk(c.risk_level);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="clause-name">${esc(formatName(c.clause))}</td>
+        <td><span class="risk-badge risk-${r}">${r.replace('_',' ')}</span></td>
+        <td class="plain-text">${esc(c.plain_english||'')}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    const accContainer = document.getElementById('accordion-items');
+    accContainer.innerHTML = '';
+    const priority = clauses.filter(c => { const r=normaliseRisk(c.risk_level); return r==='HIGH'||r==='MEDIUM'; });
+
+    document.getElementById('accordion-section').style.display = priority.length ? 'block' : 'none';
+
+    priority.forEach(c => {
+      const r = normaliseRisk(c.risk_level);
+      const item = document.createElement('div');
+      item.className = 'acc-item';
+      item.innerHTML = `
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="risk-badge risk-${r}">${r.replace('_',' ')}</span>
+            <span class="acc-name">${esc(formatName(c.clause))}</span>
+          </div>
+          <svg class="acc-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+        </div>
+        <div class="acc-body">
+          <div class="acc-plain">${esc(c.plain_english||'')}</div>
+          ${c.exact_quote && c.exact_quote !== 'null' && c.exact_quote !== null ? `
+            <div class="quote-box">
+              <div class="quote-label">Exact clause from contract</div>
+              ${esc(c.exact_quote)}
+            </div>` : ''}
+        </div>`;
+      item.querySelector('.acc-header').addEventListener('click', () => item.classList.toggle('open'));
+      accContainer.appendChild(item);
+    });
+  }
+
+  function resetToUpload() {
+    selectedFile = null;
+    fileInput.value = '';
+    fileNameDisplay.style.display = 'none';
+    analyseBtn.disabled = true;
+    hideError();
+    for (let i=0;i<5;i++) document.getElementById('step-'+i).className='step';
+    showState('upload');
+  }
+
+  function downloadReport() {
+    const el  = document.getElementById('report-state');
+    const btn = el.querySelector('.download-btn');
+    const rst = el.querySelector('.reset-btn');
+    btn.style.display = 'none';
+    rst.style.display = 'none';
+    html2pdf().set({
+      margin: [12,14],
+      filename: 'harbour-risk-report.pdf',
+      html2canvas: { scale: 2, backgroundColor: '#f8f5f0' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).save().then(() => {
+      btn.style.display = '';
+      rst.style.display = '';
+    });
+  }
+</script>
+</body>
+</html>
